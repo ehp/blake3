@@ -18,9 +18,6 @@
  */
 package cz.aprar.oss.blake3;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.DynamicTest;
@@ -29,10 +26,11 @@ import org.junit.jupiter.api.TestFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static cz.aprar.oss.blake3.Blake3.OUT_LEN;
+import static cz.aprar.oss.blake3.VectorUtils.inputBytes;
+import static cz.aprar.oss.blake3.VectorUtils.testVector;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class HasherTest {
@@ -47,30 +45,19 @@ class HasherTest {
     }
 
     @TestFactory
-    Stream<DynamicTest> testVectors() throws IOException {
-        final var mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        final var testVector = mapper.readValue(getClass().getResourceAsStream("/test_vectors.json"), TestVector.class);
-        return testVector.cases().stream().flatMap((tc) -> Stream.of(
+    Stream<DynamicTest> testFactory() throws IOException {
+        var vector = testVector();
+        return vector.cases().stream().flatMap((tc) -> Stream.of(
                 DynamicTest.dynamicTest("regular-" + tc.inputLen(), () -> {
                     testRegular(tc, inputBytes(tc.inputLen()));
                 }),
                 DynamicTest.dynamicTest("keyed-" + tc.inputLen(), () -> {
-                    testKeyed(tc, inputBytes(tc.inputLen()), testVector.key().getBytes());
+                    testKeyed(tc, inputBytes(tc.inputLen()), vector.key().getBytes());
                 }),
                 DynamicTest.dynamicTest("derived-" + tc.inputLen(), () -> {
-                    testDerivation(tc, inputBytes(tc.inputLen()), testVector.contextString());
+                    testDerivation(tc, inputBytes(tc.inputLen()), vector.contextString());
                 })
         ));
-    }
-
-    byte[] inputBytes(int len) {
-        final var inputBytes = new byte[len];
-        for (int i = 0; i < len; i++) {
-            inputBytes[i] = (byte) (i % 251);
-        }
-        return inputBytes;
     }
 
     void testRegular(final Case testCase, final byte[] inputBytes) throws DecoderException {
@@ -94,20 +81,3 @@ class HasherTest {
         assertArrayEquals(expected, hasher.finalizeHash(expected.length));
     }
 }
-
-record Case(
-        @JsonProperty("input_len")
-        int inputLen,
-        String hash,
-        @JsonProperty("keyed_hash")
-        String keyedHash,
-        @JsonProperty("derive_key")
-        String deriveKey
-) { }
-
-record TestVector(
-        String key,
-        @JsonProperty("context_string")
-        String contextString,
-        List<Case> cases
-) { }

@@ -37,9 +37,29 @@ hasher.update(inputBytes);
 final var hash = hasher.finalizeHash(expected.length);
 ```
 
+### JCA Message digest
+
+Install Blake3 JCA provider:
+
+```java
+import cz.aprar.oss.blake3.jca.Blake3Provider;
+
+Security.addProvider(new Blake3Provider());
+```
+
+and then use Blake3 like any other message digests:
+
+```java
+final var digest = MessageDigest.getInstance("Blake3");
+digest.update(inputBytes);
+final var hash = digest.digest();
+```
+
+Alternatively, there is `Blake3ExtendedHashSize` digest with hash size 131 bytes instead of standard 32 bytes.
+
 ## TODO
 
-- JCE provider
+- ~~JCA provider~~
 - SIMD vectorized implementation
 - Benchmarks
 
