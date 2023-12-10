@@ -5,8 +5,8 @@ plugins {
 version = "0.1"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 
     withJavadocJar()
     withSourcesJar()
@@ -17,9 +17,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
-    testImplementation("commons-codec:commons-codec:1.15")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.16.0")
+    testImplementation("commons-codec:commons-codec:1.16.0")
 }
 
 tasks.compileJava {
